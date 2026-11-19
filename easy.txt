@@ -1,0 +1,6 @@
+python -m venv .venv
+.venv\Scripts\python -m pip install -e ".[pdf]"
+.venv\Scripts\python -c "import mcp; import anyio; print('uefi-uefimcp-lcne OK')"
+.venv\Scripts\python scripts\check_mcp.py
+claude mcp add --scope user uefi-uefimcp-lcne -- "E:\Bibliotecas\Documentos\PROGRAMMING\UEFIabc\uefi-uefimcp-lcne\.venv\Scripts\python.exe" "E:\Bibliotecas\Documentos\PROGRAMMING\UEFIabc\uefi-uefimcp-lcne\run.py"
+claude mcp list

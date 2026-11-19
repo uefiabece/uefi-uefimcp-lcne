@@ -1,87 +1,66 @@
-# uefi-uefimcp — MCP Template for UFABC Subjects
+# uefi-uefimcp-lcne
 
-This repository is the **base template** for all UEFIabc MCP (Model Context Protocol) servers.
+Servidor MCP da **Licenciatura em Ciências Naturais e Exatas (LCNE)**, UFABC. Nível: **curso** (primeiro ciclo, interdisciplinar). É a porta de entrada para as licenciaturas específicas de segundo ciclo, como a Licenciatura em Ciências Biológicas (`uefi-uefimcp-bio`).
 
-Each MCP server in this ecosystem is specialized for a specific UFABC course or subject, loaded with educational content such as syllabi, bibliographies, past exams, exercises, and media. The goal is for each server to be a genuine expert in its domain: capable of teaching, explaining, solving exercises, and reasoning practically about subject matter.
+## Origem
 
----
+Derivado de [`uefi-uefimcp`](https://github.com/uefiabece/uefi-uefimcp) por `git clone`
+(commit de origem registrado em `config/subject.json`), sem importar materiais acadêmicos.
 
-## Ecosystem Hierarchy
+- Do `uefi-uefimcp-bct`: leitura opcional de PDF no `ContentLoader` e ferramentas de navegação curricular (`src/tools/curriculum.py`, adaptado à LCNE: disciplinas pedagógicas, estágio supervisionado e licenciatura de segundo ciclo pretendida).
+- Do `uefi-uefimcp-neuro`: SDK MCP restrito à v1 (`mcp>=1.27,<2`), `config/mcp.example.json` e o teste de conexão `scripts/check_mcp.py`.
 
-```
-uefi-uefimcp           ← this repo (generic template)
-  └── uefi-<course>    ← course-level repo (e.g. uefi-science-and-technology)
-        └── uefi-<subject>  ← subject-level repo (e.g. uefi-precalculus)
-```
-
-When creating a new subject MCP, fork or copy this template, then specialize it by:
-1. Filling `/content/` with subject-specific material
-2. Editing `/config/subject.json` with subject metadata
-3. Updating the system prompt in `/prompts/system.md`
-4. Adding or removing tools in `/src/tools/` as needed
-
----
-
-## Directory Structure
-
-```
-uefi-uefimcp/
-├── src/
-│   ├── server.py           # MCP server entry point
-│   ├── tools/              # MCP tool implementations
-│   │   ├── content.py      # Syllabus, bibliography, exam retrieval
-│   │   ├── teaching.py     # Concept explanation, teaching flows
-│   │   └── exercises.py    # Exercise solving and generation
-│   ├── resources/
-│   │   └── loader.py       # Content loading and indexing utilities
-│   └── prompts/
-│       └── templates.py    # Prompt template helpers
-├── content/
-│   ├── syllabus/           # Official course syllabus files
-│   ├── bibliography/       # Reading materials and references
-│   ├── exams/              # Past exams and answer keys
-│   ├── exercises/          # Practice exercises (by topic)
-│   ├── notes/              # Lecture notes and summaries
-│   └── media/              # Images, diagrams, circuit files, etc.
-├── prompts/
-│   ├── system.md           # Base system prompt — defines the server's identity
-│   ├── teaching.md         # Prompt fragment for teaching mode
-│   └── solver.md           # Prompt fragment for exercise-solving mode
-├── config/
-│   └── subject.json        # Subject metadata and feature flags
-└── docs/
-    ├── setup.md            # How to run the MCP server
-    ├── content-guide.md    # How to add and structure content
-    └── customization.md    # How to specialize this template
+```text
+uefi-uefimcp
+  ├── uefi-uefimcp-bct  ──→ Bacharelados (comp, dados, bio/bacharelado, ...)
+  └── uefi-uefimcp-lcne ──→ Licenciaturas (bio/licenciatura, ...)
 ```
 
----
+## Executar
 
-## Capabilities (all subjects)
+Requer Python 3.11 ou superior. No diretório deste repositório:
 
-- **Teach** concepts from the subject syllabus with clear, structured explanations
-- **Retrieve** syllabus, bibliography, and official course materials
-- **Solve** exercises step-by-step, showing reasoning
-- **Generate** new exercises at configurable difficulty levels
-- **Reference** past exams and explain solutions
-- **Search** across all loaded content
-
-## Capabilities (subject-specific, enabled via config)
-
-- **Interpret images** (e.g. circuit diagrams, graphs, chemical structures)
-- **Create or edit structured files** (e.g. circuit netlists, data tables)
-- **Run computations** (symbolic math, numerical simulation)
-
----
-
-## Quick Start
-
-```bash
-# Install dependencies
-pip install -e ".[dev]"
-
-# Run the MCP server (stdio transport, for use with Claude Desktop / Claude Code)
-python -m src.server
+```sh
+python -m venv .venv
+.venv/Scripts/python -m pip install -e ".[pdf]"
+.venv/Scripts/python run.py
 ```
 
-See [`docs/setup.md`](./docs/setup.md) for full setup instructions.
+O processo usa transporte **stdio**: deve ser iniciado por um cliente MCP.
+Em Linux/macOS, use `.venv/bin/python`.
+
+## Conectar
+
+Claude Code:
+
+```sh
+claude mcp add --scope user uefi-uefimcp-lcne -- "CAMINHO_ABSOLUTO/uefi-uefimcp-lcne/.venv/Scripts/python.exe" "CAMINHO_ABSOLUTO/uefi-uefimcp-lcne/run.py"
+```
+
+Outros clientes: veja `config/mcp.example.json`.
+
+## Ferramentas
+
+17 ferramentas:
+
+- **Conteúdo / ensino / exercícios (template):** `get_syllabus`, `get_bibliography`, `get_past_exams`, `search_content`, `get_notes`, `explain_concept`, `get_topic_outline`, `generate_study_plan`, `get_exercises`, `solve_exercise`, `generate_exercise`, `generate_flashcards`
+- **Navegação curricular** (`curriculum_navigation: true`): `get_curriculum_structure`, `list_subjects_by_area`, `get_disciplinas_limitadas`, `get_progression_requirements`, `plan_academic_journey`
+
+Prompts: `teach` e `solve`.
+
+## Conteúdo
+
+As pastas de `content/` estão vazias. Sugestões:
+
+- `content/bibliography/` — PPC da LCNE (PDF), planejamento de oferta, normas de estágio
+- `content/syllabus/curriculo_lcne.md` — síntese estrutural do currículo (como `curriculo_bct.md` no BCT)
+
+Ao adicionar o PPC, preencha `ppc_version`, `ppc_versions_available`, `total_credits_approx`,
+`duration_years` e a lista `second_cycle_courses` em `config/subject.json`.
+Sem materiais, as consultas retornam a ausência de conteúdo.
+
+## Verificar
+
+```sh
+.venv/Scripts/python scripts/check_mcp.py
+```
